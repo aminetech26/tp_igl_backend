@@ -20,7 +20,7 @@ cd tp_igl_backend
 
 ```bash
 python -m venv env
-source venv/bin/activate   # On Windows, use venv\Scripts\activate
+source venv/bin/activate   # On Windows, use env\Scripts\activate
 pip install -r requirements.txt
 ```
 -Additionally, you might need to configure your database settings in the `settings.py` file and perform migrations accordingly.
