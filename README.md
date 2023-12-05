@@ -24,6 +24,7 @@ source venv/bin/activate   # On Windows, use env\Scripts\activate
 pip install -r requirements.txt
 ```
 -Additionally, you might need to configure your database settings in the `settings.py` file and perform migrations accordingly.
+
 3-Start the development server.
 
 ```bash
