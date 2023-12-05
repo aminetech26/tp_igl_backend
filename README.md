@@ -28,6 +28,7 @@ pip install -r requirements.txt
 3-Start the development server.
 
 ```bash
+cd core
 python manage.py runserver
 ```
 
