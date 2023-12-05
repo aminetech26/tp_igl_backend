@@ -53,8 +53,8 @@ git push origin feature/my-feature
 
 -Remember to update the `requirements.txt` file with the necessary Django and other package versions used in your project.
     
-    ```bash
-    pip freeze > requirements.txt
-    ```
+  ```bash
+  pip freeze > requirements.txt
+  ```
 
 
