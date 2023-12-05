@@ -52,6 +52,7 @@ git push origin feature/my-feature
 4- Create a pull request to the main branch of the repository.
 
 -Remember to update the `requirements.txt` file with the necessary Django and other package versions used in your project.
+    
     ```bash
     pip freeze > requirements.txt
     ```
