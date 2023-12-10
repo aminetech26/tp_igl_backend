@@ -13,6 +13,6 @@ class User(AbstractUser):
     #we just need to add the user-type attribute
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='User',)
     #username is already included in REQUIRED_FIELDS so i removed it
-    REQUIRED_FIELDS = ['email','password','user_type']
+    REQUIRED_FIELDS = ['password','user_type']
     def __str__(self):
         return f"{self.username} ({self.user_type})"
