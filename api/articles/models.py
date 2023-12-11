@@ -15,7 +15,6 @@ class MotCle(models.Model):
 
 class Institution(models.Model):
     nom = models.CharField(max_length=100)
-    ville = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

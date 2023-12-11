@@ -6,7 +6,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.views import APIView
 
 from articles.documents import ArticleDocument
-from articles.serializers import ArticleSerializer
+from .serializers import ArticleSerializer
 
 
 class PaginatedElasticSearchAPIView(APIView, LimitOffsetPagination):
@@ -40,24 +40,14 @@ class SearchArticles(PaginatedElasticSearchAPIView):
     document_class = ArticleDocument
 
     def generate_q_expression(self, query, filters=None):
-        base_query = Q(
+        return Q(
             "multi_match",
             query=query,
             type="most_fields",
             fields=[
                 "titre",
-                "textIntegral",
+                "text_integral",
                 "auteurs.nom",
                 "auteurs.prenom",
-                "auteurs.institutions.nom",
-                "auteurs.institutions.ville",
                 "mot_cles.text",
-                "references_bibliographique.nom",
             ], fuzziness="auto")
-        if filters:
-            filter_queries = [Q("term", **{field: value}) for field, value in filters.items()]
-            filters_query = Q("bool", must=filter_queries)
-            final_query = base_query & filters_query
-        else:
-            final_query = base_query
-        return final_query

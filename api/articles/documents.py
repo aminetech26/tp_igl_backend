@@ -23,7 +23,6 @@ class ArticleDocument(Document):
         "institutions": fields.ObjectField(properties={
             "id": fields.IntegerField(),
             "nom": fields.TextField(),
-            "ville": fields.TextField(),
         }, multi=True)
     })
 
