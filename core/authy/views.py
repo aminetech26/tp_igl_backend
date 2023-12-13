@@ -41,7 +41,7 @@ class LoginView(APIView):
         #to test refresh i am putting the expiration time of the access token to 
         payload2 = {
             'id': user.id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=1),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=10),
             'iat': datetime.datetime.utcnow()
         }       
         AccessToken = jwt.encode(payload2, 'a-very-seCreT-kEy-WOW', algorithm='HS256')
@@ -60,8 +60,11 @@ class LoginView(APIView):
 class UserView(APIView):
 
     def get(self, request):
-        token = request.COOKIES.get('AccessToken')
-
+        # token = request.COOKIES.get('AccessToken')
+        #put the access token on a request  
+        print('user view fired')
+        token = request.headers.get('AccessToken')
+        print(token)
         if not token:
             raise AuthenticationFailed('Unauthenticated!')
 
