@@ -26,6 +26,8 @@ class ArticleDocument(Document):
         }, multi=True)
     })
 
+    date_de_publication = fields.DateField()
+
     class Index:
         name = "articles"
         settings = {

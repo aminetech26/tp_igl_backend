@@ -51,3 +51,46 @@ class SearchArticles(PaginatedElasticSearchAPIView):
                 "auteurs.prenom",
                 "mot_cles.text",
             ], fuzziness="auto")
+
+
+class FilterArticles(PaginatedElasticSearchAPIView):
+    serializer_class = ArticleSerializer
+    document_class = ArticleDocument
+
+    def generate_q_expression(self, query, filters):
+        if 'authors' in filters:
+            auteur_query = Q('terms', auteurs__nom=filters.get('authors', []))
+        else:
+            auteur_query = Q()    
+        
+        if 'keywords' in  filters:
+            motCle_query = Q('terms', mot_cles__text=filters.get('keywords', []))
+        else:
+            motCle_query = Q()    
+
+        if 'institutions' in filters:
+            institution_query = Q('terms', auteurs__institutions__nom=filters.get('institutions', []))
+        else:
+            institution_query = Q()
+        
+        
+        if 'start_date' in filters:
+            start_date = filters['start_date']
+            start_date_query = Q('range', date_de_publication={'gte': start_date})
+        else:
+            start_date_query = Q()
+ 
+        if 'end_date' in filters:
+            end_date = filters['end_date']
+            end_date_query = Q('range', date_de_publication={'lte': end_date})
+        else:
+            end_date_query = Q()
+
+        filter_query = auteur_query &  motCle_query &   institution_query &  start_date_query & end_date_query
+        return filter_query
+
+            
+                
+    
+
+    
