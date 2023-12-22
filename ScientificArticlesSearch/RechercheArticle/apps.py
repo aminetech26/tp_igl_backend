@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 
-class UsersConfig(AppConfig):
+
+class RecherchearticleConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'Users'
+    name = 'RechercheArticle'
