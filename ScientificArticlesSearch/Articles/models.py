@@ -36,5 +36,6 @@ class Article(models.Model):
     mot_cles = models.ManyToManyField(MotCle)
     auteurs = models.ManyToManyField(Auteur)
     references_bibliographique = models.ManyToManyField(ReferenceBibliographique)
+    is_validated=models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
