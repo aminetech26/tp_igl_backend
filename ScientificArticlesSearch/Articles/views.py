@@ -39,15 +39,20 @@ class ArticleViewSet(ModelViewSet):
                 return Response({'message': 'Please upload a zip file.'}, status=status.HTTP_400_BAD_REQUEST)
             
             with ZipFile(zip_file,'r') as zip:
+                pdf_files = [file for file in zip.filelist if file.filename.lower().endswith('.pdf')]
+                if not pdf_files:
+                    return Response({'message': 'No PDF files found in the zip file.'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                fs = FileSystemStorage()
                 for file in zip.filelist:
-                    if file.filename.endswith('.pdf'):
+                    if file.filename.lower().endswith('.pdf'):
                         file_name = file.filename.split('/')[-1]
                         file_content = ContentFile(zip.read(file))
-                        fs = FileSystemStorage()
                         file_name = fs.save(file_name, file_content)
                         file_path = fs.url(file_name)
                         uploaded_article = UploadedArticle(file=file_path.lstrip('/'))
                         uploaded_article.save()
+                        #TODO: call pdf scrapper here for each file
             
             return Response({'message': 'Articles uploaded successfully'}, status=status.HTTP_201_CREATED)
                 
