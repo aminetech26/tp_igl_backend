@@ -28,7 +28,7 @@ pip install -r requirements.txt
 3-Start the development server.
 
 ```bash
-cd api
+cd ScientificArticlesSearch
 python manage.py runserver
 ```
 
@@ -57,5 +57,6 @@ git push origin feature/my-feature
   ```bash
   pip freeze > requirements.txt
   ```
+
 
 
