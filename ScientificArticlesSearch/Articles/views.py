@@ -8,7 +8,7 @@ from rest_framework import status
 from .forms import ArticleUploadForm
 from .models import Article,UploadedArticle
 from .serializers import ArticleSerializer
-
+from zipfile import ZipFile
 import requests
 
 from django.conf import settings
@@ -30,6 +30,30 @@ class ArticleViewSet(ModelViewSet):
                     return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=False, methods=['post'], url_path='upload-via-zip')
+    def upload_article_via_zip(self, request, *args, **kwargs):
+        try:
+            zip_file = request.FILES.get('file')
+            if not zip_file.name.endswith('.zip'):
+                return Response({'message': 'Please upload a zip file.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            with ZipFile(zip_file,'r') as zip:
+                for file in zip.filelist:
+                    if file.filename.endswith('.pdf'):
+                        file_name = file.filename.split('/')[-1]
+                        file_content = ContentFile(zip.read(file))
+                        fs = FileSystemStorage()
+                        file_name = fs.save(file_name, file_content)
+                        file_path = fs.url(file_name)
+                        uploaded_article = UploadedArticle(file=file_path.lstrip('/'))
+                        uploaded_article.save()
+            
+            return Response({'message': 'Articles uploaded successfully'}, status=status.HTTP_201_CREATED)
+                
+        except Exception:
+            return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
     
     @action(detail=False, methods=['post'], url_path='upload-via-url')
     def upload_article_via_url(self, request, *args, **kwargs):
@@ -54,8 +78,7 @@ class ArticleViewSet(ModelViewSet):
             else:
                 return Response({'message': 'Please provide a url'}, status=status.HTTP_400_BAD_REQUEST)
             
-        except Exception as e:
-            print(e)
+        except Exception:
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def create(self, request, *args, **kwargs):
