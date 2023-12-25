@@ -86,6 +86,8 @@ class ArticleViewSet(ModelViewSet):
         except Exception:
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+             
+            
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
     

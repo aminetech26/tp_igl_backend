@@ -344,3 +344,72 @@ class ArticleApiTests(TestCase):
         self.assertEqual(Institution.objects.count(), 1)
         self.assertEqual(ReferenceBibliographique.objects.count(), 1)
     
+    def test_upload_article_via_url_with_not_valid_url(self):
+        url = reverse('article-upload-via-url')
+        data = {
+            "url": "https://www.researchgate.net/publication/333502343_A_New_Approach_for_Solving_the_Graph_Coloring_Problem"
+        }
+        response = self.client.post(url,data,format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data.get('message'), 'Invalid PDF URL')
+        # aucune article n'est ajouté
+        self.assertEqual(Article.objects.count(), 1)
+        self.assertEqual(MotCle.objects.count(), 1)
+        self.assertEqual(Auteur.objects.count(), 1)
+        self.assertEqual(Institution.objects.count(), 1)
+        self.assertEqual(ReferenceBibliographique.objects.count(), 1)
+    
+    def test_upload_article_via_url_with_not_found_url(self):
+        url = reverse('article-upload-via-url')
+        data = {
+            "url": "https://not_found_url_example.pdf"
+        }
+        response = self.client.post(url,data,format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data.get('message'), 'File not found')
+        # aucune article n'est ajouté
+        self.assertEqual(Article.objects.count(), 1)
+        self.assertEqual(MotCle.objects.count(), 1)
+        self.assertEqual(Auteur.objects.count(), 1)
+        self.assertEqual(Institution.objects.count(), 1)
+        self.assertEqual(ReferenceBibliographique.objects.count(), 1)
+    
+    def test_upload_article_via_url_with_empty_body(self):
+        url = reverse('article-upload-via-url')
+        data = {}
+        response = self.client.post(url,data,format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data.get('message'), 'Please provide a url')
+        # aucune article n'est ajouté
+        self.assertEqual(Article.objects.count(), 1)
+        self.assertEqual(MotCle.objects.count(), 1)
+        self.assertEqual(Auteur.objects.count(), 1)
+        self.assertEqual(Institution.objects.count(), 1)
+        self.assertEqual(ReferenceBibliographique.objects.count(), 1)
+    
+    def test_upload_article_via_url_with_valid_url(self):
+        url = reverse('article-upload-via-url')
+        data = {
+            "url": "https://www.researchgate.net/publication/333502343_A_New_Approach_for_Solving_the_Graph_Coloring_Problem.pdf"
+        }
+        response = self.client.post(url,data,format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data.get('message'), 'File downloaded and saved successfully')
+        #TODO: finish the test when you integrate the pdf scrapper
+    
+    def test_upload_article_via_zip_with_not_valid_file(self):
+        url = reverse('article-upload-via-zip')
+        data = {
+            "file": "not_valid_file"
+        }
+        response = self.client.post(url,data,format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data.get('message'), 'Please upload a zip file.')
+        # aucune article n'est ajouté
+        self.assertEqual(Article.objects.count(), 1)
+        self.assertEqual(MotCle.objects.count(), 1)
+        self.assertEqual(Auteur.objects.count(), 1)
+        self.assertEqual(Institution.objects.count(), 1)
+        self.assertEqual(ReferenceBibliographique.objects.count(), 1)
+        
+        
