@@ -65,8 +65,6 @@ class ArticleViewSet(ModelViewSet):
         try:
             if request.data.get('url'):
                     pdf_url = request.data['url']
-                    if not pdf_url.lower().endswith('.pdf','.pdf/'):
-                        return Response({'message': 'Invalid PDF URL'}, status=status.HTTP_400_BAD_REQUEST)
                     response = requests.get(pdf_url)
                     if response.status_code == 200:
                         file_name = pdf_url.split('/')[-1]
@@ -83,11 +81,11 @@ class ArticleViewSet(ModelViewSet):
             else:
                 return Response({'message': 'Please provide a url'}, status=status.HTTP_400_BAD_REQUEST)
             
-        except Exception:
+        except Exception as e:
+            print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-             
-            
+
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
     

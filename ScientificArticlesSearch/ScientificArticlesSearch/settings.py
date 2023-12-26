@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework',
     'corsheaders',
+    'django_elasticsearch_dsl',
     # Local Apps
     'Articles',
     'ArticlesFavoris',
