@@ -2,7 +2,7 @@ from django.db import models
 
 
 class ReferenceBibliographique(models.Model):
-    nom = models.CharField(max_length=200)
+    nom = models.CharField(max_length=2000)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

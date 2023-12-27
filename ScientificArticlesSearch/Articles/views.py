@@ -28,7 +28,8 @@ class ArticleViewSet(ModelViewSet):
                     return Response({'message': 'Article uploaded successfully!'}, status=status.HTTP_201_CREATED)
                 else:
                     return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception:
+        except Exception as e:
+            print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     @action(detail=False, methods=['post'], url_path='upload-via-zip')
