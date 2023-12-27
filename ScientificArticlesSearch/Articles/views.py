@@ -70,7 +70,7 @@ class ArticleViewSet(ModelViewSet):
                         file_name = pdf_url.split('/')[-1]
                         file_content = ContentFile(response.content)
                         fs = FileSystemStorage()
-                        file_name = fs.save(f'''{file_name}''', file_content)
+                        file_name = fs.save(file_name, file_content)
                         file_path = fs.url(file_name)
                         uploaded_article = UploadedArticle(file=file_path.lstrip('/'))
                         uploaded_article.save()
