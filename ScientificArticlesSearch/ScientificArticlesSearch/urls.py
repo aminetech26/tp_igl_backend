@@ -23,6 +23,6 @@ urlpatterns = [
     path("api/articles/", include("Articles.urls")),
     path("api/recherche/article/", include("RechercheArticle.urls")),
     path("api/users/", include("Users.urls")),
-    #path("api/moderation/", include("Moderation.urls")),
+    path("api/moderation/", include("Moderation.urls")),
     #path("api/articles_favoris/", include("ArticlesFavoris.urls")),
 ]
