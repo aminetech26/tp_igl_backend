@@ -1,4 +1,3 @@
-import fitz
 import re
 from .multi_column import column_boxes
 
