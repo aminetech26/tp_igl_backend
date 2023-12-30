@@ -1,27 +1,28 @@
 import ast
 import requests
 from googleapiclient.http import MediaIoBaseDownload
-import io
 import fitz
-from date_exractor import *
-from manual_scraping import *
+from .date_exractor import extract_date_from_text
+from .manual_scraping import extract_text_between_markers, extract_references
 import io
-from Article import *
-from Author import *
 import time
+from .Article import Article
+from .Auteur import Auteur
 
-class Scrapper:
+class ArticleScrapper:
     def __init__(self):
         self.article = Article()
+        
+    
     #SCRAPING MANUEL CONFIG
     text_start_keywords = ["1. Motivation and significance","I. Introduction","1. Introduction","I. Introduction", "Introduction"]
     text_end_keywords = ["REFERENCES","REFERENCES "," REFERENCES", "References","references"," REFERENCES", " References"," references","REFERENCES:", "References:","references:","REFERENCES"]
     reference_start_keywords = ["REFERENCES","REFERENCES", "References","references"," REFERENCES", " References"," references","REFERENCES:", "References:","references:","References "," References"," References ","References",]
     reference_end_keywords = ["Appendix", "APPENDIX"]
 
+        
 
-    def getArticleFromUrl(self,service,file_name,file_id,url):
-       
+    def get_article_from_url(self,service,file_name,file_id,url):
         #REQUEST CONFIG
         RETRY_ATTEMPTS = 3  
         ATTEMPT = 1
@@ -75,8 +76,8 @@ class Scrapper:
                             self.article.mots_cles = [mot.strip() for mot in response.json()['content'].split(',')]
                         elif champ == "date-de-publication":
                             date_str = response.json()['content']
-                            dateDePublication = extract_date_from_text(date_str)
-                            self.article.dateDePublication = dateDePublication
+                            date_de_publication = extract_date_from_text(date_str)
+                            self.article.date_de_publication = date_de_publication
                         elif champ == "institutions":
                             response_content = response.text
                             # Use ast.literal_eval to safely parse the string into a dictionary
@@ -85,10 +86,8 @@ class Scrapper:
                                 for author_name, institution in institutions_dict.items():
                                     print(author_name)
                                     print(institution)
-                                    author = Author(nom=author_name.strip(), institution=institution.strip())
-                                    self.article.authors.append(author)
-
-                                print(self.article.authors)                          
+                                    author = Auteur(nom=author_name.strip(), institution=institution.strip())
+                                    self.article.auteurs.append(author)
 
                     else:
                         print(f"Attempt {ATTEMPT}/{RETRY_ATTEMPTS} - Retrying after 5 seconds...")
@@ -121,3 +120,4 @@ class Scrapper:
                 return self.article
         else:
             return None
+        

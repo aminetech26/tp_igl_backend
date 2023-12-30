@@ -10,7 +10,7 @@ from .models import Article,UploadedArticle
 from .serializers import ArticleSerializer
 from zipfile import ZipFile
 import requests
-
+from .scrapping.scrapping_manager import ScrappingManager
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 class ArticleViewSet(ModelViewSet):
@@ -86,7 +86,15 @@ class ArticleViewSet(ModelViewSet):
             print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-
+    @action(detail=False, methods=['post'], url_path='upload-via-drive')
+    def upload_article_via_drive(self, request, *args, **kwargs):
+        try:
+            scrapper = ScrappingManager()
+            scrapper.run_scrapper()
+            return Response({'message': 'File downloaded and saved successfully'}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(e)
+            return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
     

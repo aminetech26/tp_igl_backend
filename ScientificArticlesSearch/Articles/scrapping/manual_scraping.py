@@ -1,12 +1,6 @@
-import fitz
 import re
-from multi_column import column_boxes
+from .multi_column import column_boxes
 
-doc = fitz.open("article 2.pdf")
-
-titre = doc.metadata['title']
-authorList = doc.metadata['author'].split(", ")
-keywords = doc.metadata['keywords'].split(", ")
 
 keywords_list = ["Keywords: ","Keywords", "Key Word", "Keywords—", "Keywords:", "Key terms", "Main points","Keywords :","Key words:"]
 abstract_start_keywords = ["1 ABSTRACT","1  ABSTRACT","Abstract", "Abstract——", "Abstract","Summary","abstract","ABSTRACT","ABSTRACT."," ABSTRACT_"," Abstract:"," ABSTRACT"," ABSTRACT."," ABSTRACT_"," Abstract:"]
