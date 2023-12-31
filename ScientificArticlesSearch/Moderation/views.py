@@ -5,37 +5,48 @@ from Users.models import User
 from Users.serializers import UserSerializer
 from django.core.mail import send_mail
 from django.db import IntegrityError
-
+from rest_framework.decorators import action
+from django.contrib.auth.hashers import make_password
+from django.conf import settings
 class ModerationView(ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.filter(user_type='Mod')
     
+    
     def create(self, request, *args, **kwargs):
-        email = request.data.get('email')
-        username = request.data.get('username')
-        password = request.data.get('password')
-        first_name = request.data.get('first_name')
-        last_name = request.data.get('last_name')
-        user_type = 'Mod'
-        
-        if not email or not username or not password or not first_name or not last_name:
-            return Response({'message': 'Please provide all the required fields.'}, status=status.HTTP_400_BAD_REQUEST)
-        
+        users_id = request.data.get('users_ids',[])
+        if not users_id:
+            return Response({'message': 'Please provide moderators ids.'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            user = User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=user_type)
-            user.save()
-            send_mail(
-                'Account created',
-                'Your account has been created successfully.',
-                'settings.EMAIL_HOST_USER',
-                [email],
-                fail_silently=False,
-            )
-            return Response({'message': 'Moderator created successfully'}, status=status.HTTP_201_CREATED)
+            for user_id in users_id:
+                existing_user = User.objects.get(id=user_id)
+                
+                new_moderator = User.objects.create(
+                    email=existing_user.email,
+                    username=f"{existing_user.username}_moderateur",
+                    first_name=existing_user.first_name,
+                    last_name=existing_user.last_name,
+                    password=existing_user.password,
+                    user_type='Mod'
+                )
+                new_moderator.save()
+                send_mail(
+                    'Moderator account created',
+                    'You have been added as a moderator.',
+                    settings.EMAIL_HOST_USER,
+                    [existing_user.email],
+                    fail_silently=False,
+                )
+            return Response({'message': 'Moderator added successfully'}, status=status.HTTP_201_CREATED)
+        
+        except User.DoesNotExist:
+                return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
         except IntegrityError:
-            return Response({'message': 'User with this email or username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': 'Username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
-            return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        
 
 
     def update(self, request, *args, **kwargs):
