@@ -16,7 +16,7 @@ class ScrappingManager:
     
     def run_scrapper(self):
         folder_id = "1GaKJSn08mD7tcd3VuR9kGvJXXII6C5iB"
-        scraped_files_drive_id = "10mUi2bDk-mnmJsWwMGX5EK1UH_NYpy8-"
+        scraped_files_drive_id = "1NSLtcXMzzsIuiYLpdqbhOkjEdHoYZ0mz"
 
         results = self.drive_manager.list_files(folder_id)
         scraped_files_content = self.drive_manager.get_file_content(scraped_files_drive_id)
@@ -37,13 +37,11 @@ class ScrappingManager:
     
     def process_file(self, file_name, file_id, scraped_files_drive_id, processed_files):
         article_scrapper = ArticleScrapper()
-        
+
         public_url = self.drive_manager.get_web_content_link(file_id)
         article = article_scrapper.get_article_from_url(self.drive_manager.service, file_name, file_id, public_url)
         if article:
             self.save_article_to_data_base(article)
-            for attribute, value in article.__dict__.items():
-                print(f"{attribute}: {value}")
             processed_files.append(file_name)
             updated_content = '\n'.join(processed_files)
             
@@ -51,13 +49,13 @@ class ScrappingManager:
             self.drive_manager.update_scraped_files(scraped_files_drive_id, updated_content)
             print(f"File {file_name} updated successfully!")
         else:
-            return Exception(f'Failed after multiple attempts. {file_name} has not been uploaded. Please retry again!!')
+            return f'Failed after multiple attempts. {file_name} has not been uploaded. Please retry again!!'
             
-    def save_article_to_data_base(self,article):
-        serializer = ArticleSerializer(data=article.__dict__)
+    def save_article_to_database(self,article):
+        serializer = ArticleSerializer(data=article)
+        
         if serializer.is_valid():
-            serializer.save()
-            return serializer.data
+            serializer.create(serializer.validated_data)
         else:
-            return Exception("Error while saving article to database")
+            return "Error while saving article to database"
         

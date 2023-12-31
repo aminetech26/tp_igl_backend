@@ -19,7 +19,6 @@ class ArticleDocument(Document):
     auteurs = fields.ObjectField(properties={
         "id": fields.IntegerField(),
         "nom": fields.TextField(),
-        "prenom": fields.TextField(),
         "institutions": fields.ObjectField(properties={
             "id": fields.IntegerField(),
             "nom": fields.TextField(),

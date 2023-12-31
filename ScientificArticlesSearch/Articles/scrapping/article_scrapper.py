@@ -6,12 +6,20 @@ from .date_exractor import extract_date_from_text
 from .manual_scraping import extract_text_between_markers, extract_references
 import io
 import time
-from .Article import Article
-from .Auteur import Auteur
+import json
 
 class ArticleScrapper:
     def __init__(self):
-        self.article = Article()
+        self.article = {
+            "mot_cles": [],
+            "auteurs": [],
+            "references_bibliographique": [],
+            "titre": "",
+            "resume": "",
+            "text_integral": "",
+            "url": "",
+            "date_de_publication": None,
+        }
         
     
     #SCRAPING MANUEL CONFIG
@@ -28,7 +36,7 @@ class ArticleScrapper:
         ATTEMPT = 1
         ALL_SUCCESS = False
 
-        self.article.url = url
+        self.article["url"] = url
         prompts = {
         "titre":"Retourner le titre de cet article scientifique \"sans aucun texte supplémentaire et sans aucun préfixe dans la réponse\"",
         "authors":"Retourner la liste complete des noms et prenoms complets des autheurs ce cet article sous forme de liste separes par des virgules. \"sans aucun préfixe ou texte supplémentaire dans la réponse\"",
@@ -45,7 +53,8 @@ class ArticleScrapper:
 
         data = {'url': url}
         url = f'https://api.chatpdf.com/v1/sources/add-url'
-
+        
+        print(data)
         while ATTEMPT <= RETRY_ATTEMPTS:
             response = requests.post(url, headers=headers, json=data)
 
@@ -66,28 +75,40 @@ class ArticleScrapper:
                     response = requests.post('https://api.chatpdf.com/v1/chats/message', headers=headers, json=data)
 
                     if response.status_code == 200:
-                        print(f"({champ}):")
-                        print(f"Result ({champ}): {response.json()['content']}")
                         if champ == "titre":
-                            self.article.titre = response.json()['content']
+                            self.article["titre"] = response.json()['content']
                         elif champ == "resume":
-                            self.article.resume = response.json()['content']
+                            self.article["resume"] = response.json()['content']
                         elif champ == "mots-cles":
-                            self.article.mots_cles = [mot.strip() for mot in response.json()['content'].split(',')]
+                            print(response.json()['content'].split(','))
+                            self.article["mot_cles"] = [{"text": mot.strip()} for mot in response.json()['content'].split(',')]
                         elif champ == "date-de-publication":
                             date_str = response.json()['content']
                             date_de_publication = extract_date_from_text(date_str)
-                            self.article.date_de_publication = date_de_publication
+                            if date_de_publication is not None:
+                                self.article["date_de_publication"] = date_de_publication.date()
+
                         elif champ == "institutions":
                             response_content = response.text
-                            # Use ast.literal_eval to safely parse the string into a dictionary
-                            institutions_dict = ast.literal_eval(response_content)
+                            try:
+                                institutions_dict = ast.literal_eval(response_content)
+                            except (SyntaxError, ValueError) as e:
+                                print(f"Error parsing content as a dictionary: {e}")
+                                institutions_dict = {}
+                            
                             if isinstance(institutions_dict, dict):
-                                for author_name, institution in institutions_dict.items():
-                                    print(author_name)
-                                    print(institution)
-                                    author = Auteur(nom=author_name.strip(), institution=institution.strip())
-                                    self.article.auteurs.append(author)
+                                content_dict = institutions_dict.get('content', {})
+                                try:
+                                    content_dict = json.loads(content_dict)
+                                except json.JSONDecodeError as e:
+                                    print(f"Error decoding JSON: {e}")
+                                    content_dict = {}
+                                for author_name, institution in content_dict.items():
+                                    author = {
+                                        "nom": author_name.strip(),
+                                        "institutions": [{"nom": institution.strip()}]
+                                    }
+                                    self.article["auteurs"].append(author)
 
                     else:
                         print(f"Attempt {ATTEMPT}/{RETRY_ATTEMPTS} - Retrying after 5 seconds...")
@@ -114,9 +135,14 @@ class ArticleScrapper:
             if done:
                 doc = fitz.open(file_name)
                 text = extract_text_between_markers(doc,self.text_start_keywords,self.text_end_keywords)
-                self.article.texteIntegral = text
+                if text is not None:
+                    self.article["text_integral"] = text
+
                 references = extract_references(doc,self.reference_start_keywords,self.reference_end_keywords)
-                self.article.referencesBibliographiques = references
+                if references is not None:
+                    self.article["references_bibliographique"] = [{ "nom" : reference } for reference in references]
+                else:
+                    self.article["references_bibliographique"] = []
                 return self.article
         else:
             return None
