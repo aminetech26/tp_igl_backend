@@ -22,7 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/articles/", include("Articles.urls")),
     path("api/recherche/article/", include("RechercheArticle.urls")),
-    path("api/users/", include("Users.urls")),
+    path("api/authentication/", include("Authentication.urls")),
     path("api/moderation/", include("Moderation.urls")),
     #path("api/articles_favoris/", include("ArticlesFavoris.urls")),
 ]

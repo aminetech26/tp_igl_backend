@@ -1,8 +1,9 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 from rest_framework.response import Response
-from Users.models import User
-from Users.serializers import UserSerializer
+from Authentication.models import User
+from Authentication.serializers import UserSerializer
+
 from django.db import IntegrityError
 from utils import send_moderator_account_create_email
 class ModerationView(ModelViewSet):
