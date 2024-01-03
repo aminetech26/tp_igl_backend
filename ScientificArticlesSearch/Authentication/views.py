@@ -2,20 +2,27 @@ from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
 from .serializers import UserSerializer
 from .models import User
-import jwt
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from django.conf import settings
 from .utils import create_token, decode_token
+from rest_framework import status
 
 TOKEN_EXPIRATION_ACCESS = 10
 TOKEN_EXPIRATION_REFRESH = 1440
 
 
-class UserViewSet(ModelViewSet):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    # Model View Set already has the get() and get_by_id() create() and update() and delete() methods implemented
+class AuthenticationViewSet(ViewSet):
+    @action (detail=False, methods=['post'])
+    def register(self, request):
+        user_type = request.data.get('user_type')
+        if user_type and user_type != 'User':
+            return Response({'error': 'Only users with type "User" can register.'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     
     @action(detail=False, methods=['post'])
     def login(self, request):
