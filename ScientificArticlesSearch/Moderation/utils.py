@@ -1,7 +1,7 @@
 from django.core.mail import send_mail
 from django.conf import settings
 
-def send_moderator_account_create_email(username, email, nom,prenom, moderator_email, temporary_password):
+def send_moderator_account_create_email(username, email, nom, prenom):
     subject = 'Notification de création de compte moderateur'
     
     message = f'''
@@ -21,8 +21,7 @@ def send_moderator_account_create_email(username, email, nom,prenom, moderator_e
     Merci,
     Votre équipe d'application
     '''
-
-    html_message = '''
+    html_message = f'''
     <!DOCTYPE html>
     <html lang="fr">
     <head>
@@ -35,22 +34,22 @@ def send_moderator_account_create_email(username, email, nom,prenom, moderator_e
         <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4; border-radius: 10px;">
             <h2 style="color: #333;">Notification de création de compte</h2>
             <p style="color: #555;">
-                Bonjour Modérateur,
+                Bonjour {nom.upper() + " " + prenom},
             </p>
             <p style="color: #555;">
                 Un compte a été créé avec les détails suivants :
             </p>
             <ul>
-                <li><strong>Nom :</strong> {nom}</li>
-                <li><strong>Prenom :</strong> {prenom}</li>
                 <li><strong>Nom d'utilisateur :</strong> {username}</li>
                 <li><strong>Email :</strong> {email}</li>
+                <li><strong>Nom :</strong> {nom}</li>
+                <li><strong>Prenom :</strong> {prenom}</li>
             </ul>
             <p style="color: #555;">
-                Un mot de passe temporaire a été généré pour cet utilisateur.
+                Un mot de passe temporaire a été généré pour cet utilisateur. Veuillez informer l'utilisateur de son existence.
             </p>
             <p style="color: #555;">
-                Vous devez changer ce mot de passe dès sa première connexion pour des raisons de sécurité.
+                L'utilisateur devra changer ce mot de passe dès sa première connexion pour des raisons de sécurité.
             </p>
             <p style="color: #555;">
                 Merci,
@@ -61,12 +60,11 @@ def send_moderator_account_create_email(username, email, nom,prenom, moderator_e
     </body>
     </html>
     '''
-
     send_mail(
         subject,
         message,
         settings.EMAIL_HOST_USER,
-        [moderator_email],
+        [email],
         fail_silently=False,
-        html_message=html_message,
+        html_message=html_message
     )

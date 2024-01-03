@@ -5,7 +5,7 @@ from Authentication.models import User
 from Authentication.serializers import UserSerializer
 
 from django.db import IntegrityError
-from utils import send_moderator_account_create_email
+from .utils import send_moderator_account_create_email
 class ModerationView(ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.filter(user_type='Mod')
@@ -24,12 +24,13 @@ class ModerationView(ModelViewSet):
         try:
             user = User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=user_type)
             user.save()
-            send_moderator_account_create_email(username, email, first_name, last_name, request.user.email)
+            send_moderator_account_create_email(username, email, first_name, last_name)
             
             return Response({'message': 'Moderator created successfully'}, status=status.HTTP_201_CREATED)
         except IntegrityError:
-            return Response({'message': 'User with this email or username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception:
+            return Response({'message': 'User with this username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
