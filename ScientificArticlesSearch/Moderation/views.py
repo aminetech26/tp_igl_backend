@@ -3,9 +3,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from Users.models import User
 from Users.serializers import UserSerializer
-from django.core.mail import send_mail
 from django.db import IntegrityError
-
+from utils import send_moderator_account_create_email
 class ModerationView(ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.filter(user_type='Mod')
@@ -24,13 +23,8 @@ class ModerationView(ModelViewSet):
         try:
             user = User.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=user_type)
             user.save()
-            send_mail(
-                'Account created',
-                'Your account has been created successfully.',
-                'settings.EMAIL_HOST_USER',
-                [email],
-                fail_silently=False,
-            )
+            send_moderator_account_create_email(username, email, first_name, last_name, request.user.email)
+            
             return Response({'message': 'Moderator created successfully'}, status=status.HTTP_201_CREATED)
         except IntegrityError:
             return Response({'message': 'User with this email or username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
