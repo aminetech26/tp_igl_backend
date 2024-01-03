@@ -41,7 +41,7 @@ class ScrappingManager:
         public_url = self.drive_manager.get_web_content_link(file_id)
         article = article_scrapper.get_article_from_url(self.drive_manager.service, file_name, file_id, public_url)
         if article:
-            self.save_article_to_data_base(article)
+            self.save_article_to_database(article)
             processed_files.append(file_name)
             updated_content = '\n'.join(processed_files)
             

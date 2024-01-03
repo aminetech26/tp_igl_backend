@@ -127,8 +127,7 @@ class ArticleScrapper:
 
         if ALL_SUCCESS:
             request = service.files().get_media(fileId=file_id)
-            file_path = os.path.join(settings.MEDIA_ROOT, file_name)
-            fh = io.FileIO(file_path, mode='wb')
+            fh = io.FileIO(file_name, mode='wb')
             downloader = MediaIoBaseDownload(fh, request)
             done = False
             while done is False:
