@@ -5,8 +5,6 @@ from Users.models import User
 from Users.serializers import UserSerializer
 from django.core.mail import send_mail
 from django.db import IntegrityError
-from rest_framework.decorators import action
-from django.contrib.auth.hashers import make_password
 from django.conf import settings
 class ModerationView(ModelViewSet):
     serializer_class = UserSerializer
