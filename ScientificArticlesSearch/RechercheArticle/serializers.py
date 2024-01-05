@@ -1,17 +1,21 @@
 from rest_framework import serializers
-from Articles.models import Article, Auteur
+from Articles.models import Article, Auteur, Institution
 from Articles.serializers import AuteurSerializer, MotCleSerializer
 
+class InstitutionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Institution
+        fields = ["id", "nom"]
 
 class AuteurSearchResultSerializer(serializers.ModelSerializer):
+    institutions = InstitutionSerializer(many=True)    
     class Meta:
         model = Auteur
-        fields = ["id", "nom", "prenom"]
+        fields = ["id", "nom","institutions"]
 
 class ArticleSearchResultSerializer(serializers.ModelSerializer):
-    mot_cles = MotCleSerializer(many=True)
     auteurs = AuteurSearchResultSerializer(many=True)
 
     class Meta:
         model = Article
-        fields = ["id", "titre","resume", "mot_cles", "auteurs"]
+        fields = ["id", "titre", "resume", "auteurs"]
