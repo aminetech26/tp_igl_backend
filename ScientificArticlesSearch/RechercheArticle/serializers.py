@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from Articles.models import Article, Auteur, Institution
-from Articles.serializers import AuteurSerializer, MotCleSerializer
 
 class InstitutionSerializer(serializers.ModelSerializer):
     class Meta:
