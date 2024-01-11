@@ -13,14 +13,8 @@ reference_end_keywords = ["Appendix", "APPENDIX"]
 
 def find_abstract(doc, abstract_markers, abstract_stop_words):
     page_text = doc[0].get_text()  # Get text from the first page
-
-    # Combine abstract markers into a regex pattern
     abstract_markers_pattern = "|".join(map(re.escape, abstract_markers))
-
-    # Combine abstract stop words into a regex pattern
     abstract_stop_words_pattern = "|".join(map(re.escape, abstract_stop_words))
-
-    # Construct the regex pattern to capture the abstract
     pattern = re.compile(fr'({"|".join(abstract_markers_pattern)})\s*(.*?)\s*({"|".join(abstract_stop_words_pattern)})', re.IGNORECASE | re.DOTALL)
 
     match = pattern.search(page_text)
@@ -45,32 +39,26 @@ abstract_found = False
 keywords_found = False
 
 def extract_text_between_markers(doc, start_keywords, end_keywords):
-    # Combine start keywords into a regex pattern for finding the start marker
     start_pattern = "|".join(re.escape(keyword) for keyword in start_keywords)
     start_regex = re.compile(start_pattern, re.IGNORECASE)
 
-    # Combine end keywords into a regex pattern for finding the end marker
     end_pattern = "|".join(fr'\b{re.escape(keyword)}\b' for keyword in end_keywords)
     end_regex = re.compile(end_pattern)
 
-    # Join all the text from pages into a single string
     full_text = "\n".join(page.get_text() for page in doc)
 
-    # Find the starting match
     start_match = start_regex.search(full_text)
     if start_match:
         start_index = start_match.start()
     else:
-        return None  # Start marker not found
+        return None 
 
-    # Find the ending match after the start index
     end_match = end_regex.search(full_text[start_index:])
     if end_match:
         end_index = end_match.start() + start_index
     else:
-        return None  # End marker not found
+        return None  
 
-    # Extract text between start and end indices
     extracted_text = full_text[start_index:end_index].strip()
     return extracted_text
 
@@ -79,15 +67,12 @@ def extract_references(doc, start_keywords, end_keywords):
     start_index = None
     end_found = False
 
-    # Constructing exact case-sensitive patterns for start keywords
     start_pattern = "|".join(fr'\b{re.escape(keyword)}\b' for keyword in start_keywords)
     start_regex = re.compile(start_pattern)
 
-    # Combine end keywords into a regex pattern for finding the end marker
     end_pattern = "|".join(fr'\b{re.escape(keyword)}\b' for keyword in end_keywords)
     end_regex = re.compile(end_pattern)
 
-    # Find the starting index in the document
     for page in doc:
         text = page.get_text()
         for keyword in start_keywords:
@@ -101,7 +86,6 @@ def extract_references(doc, start_keywords, end_keywords):
     if start_index is None or start_index == -1:
         return None
 
-    # Search for references within the defined section
     capturing = False
     for page in doc:
         text = page.get_text()
@@ -113,11 +97,9 @@ def extract_references(doc, start_keywords, end_keywords):
             for line in lines:
                 line = line.strip()
 
-                # Check for the start of a reference
                 if start_regex.search(line):
                     capturing = True
 
-                # Check for reference pattern only if capturing is True
                 if capturing:
                     if re.match(r'^\[\d+\]', line):
                         references.append(reference.strip())
@@ -125,7 +107,6 @@ def extract_references(doc, start_keywords, end_keywords):
                     else:
                         reference += ' ' + line
                 
-                # Check for end keywords to stop capturing references
                 if any(end_regex.search(line) for keyword in end_keywords):
                     capturing = False
                     break

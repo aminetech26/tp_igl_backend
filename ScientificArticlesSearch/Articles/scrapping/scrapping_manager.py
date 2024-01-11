@@ -45,7 +45,6 @@ class ScrappingManager:
             processed_files.append(file_name)
             updated_content = '\n'.join(processed_files)
             
-            # Update the scraped files on Google Drive
             self.drive_manager.update_scraped_files(scraped_files_drive_id, updated_content)
             print(f"File {file_name} updated successfully!")
         else:
