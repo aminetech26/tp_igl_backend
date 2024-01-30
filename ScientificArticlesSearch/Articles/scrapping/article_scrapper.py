@@ -12,6 +12,7 @@ import json
 
 class ArticleScrapper:
     def __init__(self):
+
         self.article = {
             "mot_cles": [],
             "auteurs": [],
@@ -33,6 +34,7 @@ class ArticleScrapper:
         
 
     def get_article_from_url(self,service,file_name,file_id,url):
+        
         #REQUEST CONFIG
         RETRY_ATTEMPTS = 3  
         ATTEMPT = 1
