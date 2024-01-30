@@ -204,6 +204,7 @@ for file in results.get('files', []):
         
 if not is_grobid_running():
     print("GROBID server is not running. Starting GROBID...")
+    #TODO : change the start_grobid_server function to fit with linux
     start_grobid_server()
     time.sleep(30)
 
