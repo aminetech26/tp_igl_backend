@@ -1,10 +1,11 @@
 from .models import Article
 from .serializers import ArticleSerializer
 from rest_framework.viewsets import ModelViewSet
-
+from rest_framework import permissions
 class ArticleViewSet(ModelViewSet):
     serializer_class = ArticleSerializer
     queryset = Article.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
     
     #TODO: override the create() method when pdf scrapper availlable 
     def create(self, request, *args, **kwargs):
