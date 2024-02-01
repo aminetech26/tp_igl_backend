@@ -16,7 +16,7 @@ class ScrappingManager:
     
     def run_scrapper(self):
         folder_id = "1GaKJSn08mD7tcd3VuR9kGvJXXII6C5iB"
-        scraped_files_drive_id = "1NSLtcXMzzsIuiYLpdqbhOkjEdHoYZ0mz"
+        scraped_files_drive_id = "1IP7GiE6H8ZrdFhXyM_oP093fpxPSLoKP"
 
         results = self.drive_manager.list_files(folder_id)
         scraped_files_content = self.drive_manager.get_file_content(scraped_files_drive_id)

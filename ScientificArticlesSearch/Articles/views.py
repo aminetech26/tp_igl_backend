@@ -1,18 +1,20 @@
 from django.core.files.base import ContentFile
-
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
-
+import io
+import os
 from .forms import ArticleUploadForm
 from .models import Article,UploadedArticle
 from .serializers import ArticleSerializer
 from zipfile import ZipFile
 import requests
-from .scrapping.scrapping_manager import ScrappingManager
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from .utils import extract_drive_folder_id
+from .scrapping.grobid_scrapper_manager import GrobidScrapperManager
+
 class ArticleViewSet(ModelViewSet):
     serializer_class = ArticleSerializer
     queryset = Article.objects.all()
@@ -53,7 +55,6 @@ class ArticleViewSet(ModelViewSet):
                         file_path = fs.url(file_name)
                         uploaded_article = UploadedArticle(file=file_path.lstrip('/'))
                         uploaded_article.save()
-                        #TODO: call pdf scrapper here for each file
             
             return Response({'message': 'Articles uploaded successfully'}, status=status.HTTP_201_CREATED)
                 
@@ -86,15 +87,17 @@ class ArticleViewSet(ModelViewSet):
             print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+    
     @action(detail=False, methods=['post'], url_path='upload-via-drive')
     def upload_article_via_drive(self, request, *args, **kwargs):
         try:
-            scrapper = ScrappingManager()
-            scrapper.run_scrapper()
+            GrobidScrapperManager().run_scrapper()
             return Response({'message': 'File downloaded and saved successfully'}, status=status.HTTP_201_CREATED)
         except Exception as e:
             print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
     

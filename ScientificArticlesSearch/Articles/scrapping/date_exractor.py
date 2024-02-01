@@ -32,18 +32,15 @@ def extract_date_from_text(response_text):
             for french_month, english_month in month_mapping.items():
                 month_year_str = month_year_str.replace(french_month, english_month)
 
-            date = parser.parse(month_year_str, fuzzy=True)
-            print("Date of Publication:", date)
+            date = parser.parse(month_year_str, fuzzy=True).date()
             return date
         else:
             date_match = re.search(r'(\d{1,2}/\d{1,2}/\d{4}|\d{1,2}/\d{4}|\d{4})', response_text)
 
             if date_match:
                 date_str = date_match.group(1)
-                date = parser.parse(date_str, dayfirst=False, yearfirst=False)
-                print("Date of Publication:", date)
+                date = parser.parse(date_str, dayfirst=False, yearfirst=False).date()
                 return date
             else:
-                print("No specific date or estimated date found.")
                 return None
 

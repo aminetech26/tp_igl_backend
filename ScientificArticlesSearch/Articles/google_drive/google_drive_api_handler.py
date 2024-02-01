@@ -1,6 +1,6 @@
 from .google_api_service import create_service
-from io import BytesIO
-from googleapiclient.http import MediaIoBaseUpload
+from io import BytesIO, FileIO
+from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
 
 class GoogleDriveAPIHandler:
     def __init__(self, client_secret_file, api_name, api_version, scopes):
@@ -18,6 +18,8 @@ class GoogleDriveAPIHandler:
         file_content = self.service.files().get_media(fileId=file_id).execute()
         return file_content.decode('utf-8')
     
+    def get_file_content_request(self, file_id):
+        return self.service.files().get_media(fileId=file_id)
     
     def create_permission(self, file_id):
         request_body = {
@@ -39,3 +41,18 @@ class GoogleDriveAPIHandler:
     def update_scraped_files(self, scraped_files_drive_id, updated_content):
         media = MediaIoBaseUpload(BytesIO(updated_content.encode('utf-8')), mimetype='text/plain', resumable=True)
         return self.service.files().update(fileId=scraped_files_drive_id, media_body=media).execute()
+    
+    def get_file_metadata(self, file_id):
+        return self.service.files().get(fileId=file_id, fields='webContentLink').execute()
+    
+    def download_file(self, file_id, download_path):
+        request = self.service.files().get_media(fileId=file_id)
+        fh = FileIO(download_path, mode='wb')
+        downloader = MediaIoBaseDownload(fh, request)
+        done = False
+        while not done:
+            status, done = downloader.next_chunk()
+            print(f"Download {int(status.progress() * 100)}%.")
+        print("Download Complete!")
+        
+    
