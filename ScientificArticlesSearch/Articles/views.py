@@ -19,6 +19,27 @@ class ArticleViewSet(ModelViewSet):
     serializer_class = ArticleSerializer
     queryset = Article.objects.all()
     
+    @action(detail=False,methods=['get'],url_path='validated')
+    def get_validated_articles(self,request,*args,**kwargs):
+        try:
+            articles = Article.objects.filter(is_validated=True)
+            serializer = ArticleSerializer(articles,many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=False,methods=['get'],url_path='not_validated')
+    def get_not_validated_articles(self,request,*args,**kwargs):
+        try:
+            articles = Article.objects.filter(is_validated=False)
+            serializer = ArticleSerializer(articles,many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
     @action(detail=False, methods=['post'], url_path='upload-via-file')
     def upload_article_via_file(self, request, *args, **kwargs):
         try:
@@ -96,7 +117,6 @@ class ArticleViewSet(ModelViewSet):
         except Exception as e:
             print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
     
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
