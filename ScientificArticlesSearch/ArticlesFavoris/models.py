@@ -1,5 +1,5 @@
 from django.db import models
-from Users.models import User
+from Authentication.models import User
 from Articles.models import Article
 
 class ArticleFavoris(models.Model):
