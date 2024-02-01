@@ -37,6 +37,7 @@ class ArticleDocument(Document):
     class Django:
         model = Article
         fields = [
+            "id",
             "titre",
             "resume",
             "text_integral",

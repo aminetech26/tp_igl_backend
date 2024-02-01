@@ -1,3 +1,4 @@
+from django.conf import settings
 import ast
 import requests
 from googleapiclient.http import MediaIoBaseDownload
@@ -5,6 +6,7 @@ import fitz
 from .date_exractor import extract_date_from_text
 from .manual_scraping import extract_text_between_markers, extract_references
 import io
+import os
 import time
 import json
 

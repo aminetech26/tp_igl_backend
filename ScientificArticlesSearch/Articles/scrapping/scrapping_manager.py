@@ -16,7 +16,7 @@ class ScrappingManager:
     
     def run_scrapper(self):
         folder_id = "1GaKJSn08mD7tcd3VuR9kGvJXXII6C5iB"
-        scraped_files_drive_id = "1IP7GiE6H8ZrdFhXyM_oP093fpxPSLoKP"
+        scraped_files_drive_id = "1XmbZd44kKHzyWPUR6aoE999inHPp8jdy"
 
         results = self.drive_manager.list_files(folder_id)
         scraped_files_content = self.drive_manager.get_file_content(scraped_files_drive_id)
@@ -41,7 +41,7 @@ class ScrappingManager:
         public_url = self.drive_manager.get_web_content_link(file_id)
         article = article_scrapper.get_article_from_url(self.drive_manager.service, file_name, file_id, public_url)
         if article:
-            self.save_article_to_data_base(article)
+            self.save_article_to_database(article)
             processed_files.append(file_name)
             updated_content = '\n'.join(processed_files)
             
