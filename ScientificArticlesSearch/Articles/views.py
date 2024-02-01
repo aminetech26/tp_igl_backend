@@ -47,7 +47,6 @@ class ArticleViewSet(ModelViewSet):
                 form = ArticleUploadForm(request.POST, request.FILES)
                 if form.is_valid():
                     form.save()
-                    #TODO: call pdf scrapper here
                     return Response({'message': 'Article uploaded successfully!'}, status=status.HTTP_201_CREATED)
                 else:
                     return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
