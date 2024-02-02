@@ -9,6 +9,7 @@ from .utils import create_token, decode_token
 from rest_framework import status
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 TOKEN_EXPIRATION_ACCESS = 600
 TOKEN_EXPIRATION_REFRESH = 1440
@@ -33,7 +34,8 @@ class AuthenticationViewSet(ViewSet):
             400: openapi.Response('Bad request'),
         }
     )
-    @action (detail=False, methods=['post'])
+    
+    @action (detail=False, methods=['post'],permission_classes = (AllowAny,))
     def register(self, request):
         user_type = request.data.get('user_type')
         if user_type and user_type != 'User':
@@ -58,7 +60,7 @@ class AuthenticationViewSet(ViewSet):
             400: openapi.Response('Bad request'),
         }
     )
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'],permission_classes = (AllowAny,))
     def login(self, request):
         username = request.data['username']
         password = request.data['password']

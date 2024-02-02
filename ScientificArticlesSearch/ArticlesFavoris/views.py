@@ -7,7 +7,7 @@ from Authentication.models import User
 class ArticleFavorisViewSet(viewsets.ModelViewSet):
     queryset = ArticleFavoris.objects.all()
     serializer_class = ArticleFavorisSerializer
-    #permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     
     
     def list(self, request, *args, **kwargs):
