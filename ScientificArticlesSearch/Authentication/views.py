@@ -7,12 +7,32 @@ from rest_framework.decorators import action
 from django.conf import settings
 from .utils import create_token, decode_token
 from rest_framework import status
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 TOKEN_EXPIRATION_ACCESS = 600
 TOKEN_EXPIRATION_REFRESH = 1440
 
 
 class AuthenticationViewSet(ViewSet):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='User username'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='User email'),
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='User first name'),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='User last name'),
+            },
+            required=['username', 'password'],
+        ),
+        operation_description="Register a user",
+        responses={
+            201: openapi.Response('User registered', UserSerializer),
+            400: openapi.Response('Bad request'),
+        }
+    )
     @action (detail=False, methods=['post'])
     def register(self, request):
         user_type = request.data.get('user_type')
@@ -23,7 +43,21 @@ class AuthenticationViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='User username'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),
+            },
+            required=['username', 'password'],
+        ),
+        operation_description="Login a user",
+        responses={
+            200: openapi.Response('User logged in', openapi.Schema(type=openapi.TYPE_OBJECT,properties={'username': openapi.Schema(type=openapi.TYPE_STRING, description='User username'),'password': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),},required=['username', 'password'])),
+            400: openapi.Response('Bad request'),
+        }
+    )
     @action(detail=False, methods=['post'])
     def login(self, request):
         username = request.data['username']
