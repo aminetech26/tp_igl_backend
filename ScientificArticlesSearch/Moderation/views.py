@@ -6,6 +6,9 @@ from Authentication.serializers import UserSerializer
 
 from django.db import IntegrityError
 from .utils import send_moderator_account_create_email
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import action
 class ModerationView(ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.filter(user_type='Mod')
@@ -47,9 +50,25 @@ class ModerationView(ModelViewSet):
             return Response({'message': 'Moderator not found.'}, status=status.HTTP_404_NOT_FOUND)
         except Exception:
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        
-    def delete(self, request, *args, **kwargs):
+    
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'moderators_ids': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_INTEGER), description='List of moderators ids'),
+            },
+            required=['moderators_ids'],
+        ),
+        operation_description="delete moderateurs by ids",
+        responses={
+            204: openapi.Response('moderateurs deleted successfully', UserSerializer),
+            400: openapi.Response('Bad request, Please provide moderators ids.'),
+            404: openapi.Response('No moderators found'),
+            500: openapi.Response('Internal server error'),
+        }
+    )
+    @action(detail=False, methods=['delete'])
+    def delete_by_ids(self, request, *args, **kwargs):
         moderators_ids = request.data.get('moderators_ids')
         if not moderators_ids:
             return Response({'message': 'Please provide moderators ids.'}, status=status.HTTP_400_BAD_REQUEST)
