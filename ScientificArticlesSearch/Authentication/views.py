@@ -7,16 +7,35 @@ from rest_framework.decorators import action
 from django.conf import settings
 from .utils import create_token, decode_token
 from rest_framework import status
-
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-TOKEN_EXPIRATION_ACCESS = 10
+TOKEN_EXPIRATION_ACCESS = 600
 TOKEN_EXPIRATION_REFRESH = 1440
 
 
 class AuthenticationViewSet(ViewSet):
-
-    @action (detail=False, methods=['post'])
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='User username'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='User email'),
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='User first name'),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='User last name'),
+            },
+            required=['username', 'password'],
+        ),
+        operation_description="Register a user",
+        responses={
+            201: openapi.Response('User registered', UserSerializer),
+            400: openapi.Response('Bad request'),
+        }
+    )
+    
+    @action (detail=False, methods=['post'],permission_classes = (AllowAny,))
     def register(self, request):
         user_type = request.data.get('user_type')
         if user_type and user_type != 'User':
@@ -26,8 +45,22 @@ class AuthenticationViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    
-    @action(detail=False, methods=['post'],permission_classes = (AllowAny,)) 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='User username'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),
+            },
+            required=['username', 'password'],
+        ),
+        operation_description="Login a user",
+        responses={
+            200: openapi.Response('User logged in', openapi.Schema(type=openapi.TYPE_OBJECT,properties={'username': openapi.Schema(type=openapi.TYPE_STRING, description='User username'),'password': openapi.Schema(type=openapi.TYPE_STRING, description='User password'),},required=['username', 'password'])),
+            400: openapi.Response('Bad request'),
+        }
+    )
+    @action(detail=False, methods=['post'],permission_classes = (AllowAny,))
     def login(self, request):
         username = request.data['username']
         password = request.data['password']
@@ -55,7 +88,7 @@ class AuthenticationViewSet(ViewSet):
             'user-type' : user.user_type
         }
         return response
-    
+
     @action(detail=False, methods=['post'])
     def logout(self, request):
         response = Response()

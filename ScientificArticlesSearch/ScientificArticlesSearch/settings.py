@@ -28,8 +28,12 @@ SECRET_KEY = 'django-insecure-53b1by)ov(0^2m^@!$a0=4#ke1o8#&4cwcoh$pk7#inga!=xi&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['localhost','127.0.0.1']
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 # Application definition
 
@@ -45,6 +49,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework',
     'corsheaders',
+    'django_elasticsearch_dsl',
+    'rest_framework_swagger',
+    'drf_yasg',
     # Local Apps
     'Articles',
     'ArticlesFavoris',
@@ -55,16 +62,23 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'rest_framework_simplejwt.middleware.AuthenticationMiddleware'
     'Authentication.middleware.AuthMiddleware'
-    
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_COOKIE_SECURE = False
 
 ELASTICSEARCH_DSL = {
     "default": {
@@ -99,29 +113,16 @@ WSGI_APPLICATION = 'ScientificArticlesSearch.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#   'default': {
-#     'ENGINE': 'django.db.backends.postgresql',
-#     'NAME': os.getenv('DB_NAME'),
-#     'USER': os.getenv('DB_USER'),
-#     'PASSWORD': os.getenv('DB_PASSWORD'),
-#     'HOST': os.getenv('DB_HOST'),
-#     'PORT': os.getenv('DB_PORT'),
-#     'OPTIONS': {'sslmode': 'require'},
-#     'DISABLE_SERVER_SIDE_CURSORS': True,
-#   }
-# }
-
-
 DATABASES = {
   'default': {
     'ENGINE': 'django.db.backends.postgresql',
-    'NAME': 'ScientificArticlesSearch',
-    'USER': 'khaledbenmachiche',
-    'PASSWORD': 'UHQY3LgJPE8o',
-    'HOST': 'ep-cold-thunder-a5squ40d.us-east-2.aws.neon.tech',
-    'PORT': '5432',
-    
+    'NAME': os.getenv('DB_NAME'),
+    'USER': os.getenv('DB_USER'),
+    'PASSWORD': os.getenv('DB_PASSWORD'),
+    'HOST': os.getenv('DB_HOST'),
+    'PORT': os.getenv('DB_PORT'),
+    'OPTIONS': {'sslmode': 'require'},
+    'DISABLE_SERVER_SIDE_CURSORS': True,
   }
 }
 
@@ -179,3 +180,13 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 10
 }
 
+MEDIA_URL = '/uploads/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
+
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
