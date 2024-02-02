@@ -8,7 +8,7 @@ from django.conf import settings
 from .utils import create_token, decode_token
 from rest_framework import status
 
-TOKEN_EXPIRATION_ACCESS = 10
+TOKEN_EXPIRATION_ACCESS = 600
 TOKEN_EXPIRATION_REFRESH = 1440
 
 
@@ -52,7 +52,7 @@ class AuthenticationViewSet(ViewSet):
             'user-type' : user.user_type
         }
         return response
-    
+
     @action(detail=False, methods=['post'])
     def logout(self, request):
         response = Response()
