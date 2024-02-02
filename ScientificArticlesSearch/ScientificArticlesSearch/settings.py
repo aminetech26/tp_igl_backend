@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django_elasticsearch_dsl',
+    'rest_framework_swagger',
+    'drf_yasg',
     # Local Apps
     'Articles',
     'ArticlesFavoris',
