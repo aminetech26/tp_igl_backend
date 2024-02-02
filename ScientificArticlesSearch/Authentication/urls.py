@@ -8,4 +8,6 @@ router.register(r"", AuthenticationViewSet,basename='authentication')
 
 urlpatterns = [
     path("", include(router.urls)),
+    
+
 ]

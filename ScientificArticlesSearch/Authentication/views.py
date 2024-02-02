@@ -8,11 +8,14 @@ from django.conf import settings
 from .utils import create_token, decode_token
 from rest_framework import status
 
+from rest_framework.permissions import AllowAny, IsAuthenticated
+
 TOKEN_EXPIRATION_ACCESS = 10
 TOKEN_EXPIRATION_REFRESH = 1440
 
 
 class AuthenticationViewSet(ViewSet):
+
     @action (detail=False, methods=['post'])
     def register(self, request):
         user_type = request.data.get('user_type')
@@ -24,7 +27,7 @@ class AuthenticationViewSet(ViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'],permission_classes = (AllowAny,)) 
     def login(self, request):
         username = request.data['username']
         password = request.data['password']
