@@ -41,7 +41,7 @@ class SearchArticles(PaginatedElasticSearchAPIView):
     document_class = ArticleDocument
 
     def generate_q_expression(self, query, filters=None):
-        return Q(
+        base_q = Q(
             "multi_match",
             query=query,
             type="most_fields",
@@ -52,3 +52,21 @@ class SearchArticles(PaginatedElasticSearchAPIView):
                 "auteurs.prenom",
                 "mot_cles.text",
             ], fuzziness="auto")
+
+        if filters:
+            keywords = filters.get('keywords')
+            authors = filters.get('authors')
+            institutions = filters.get('institutions')
+            start_date = filters.get('start_date')
+            end_date = filters.get('end_date')
+            
+            if keywords:
+                base_q &= Q("terms", mot_cles__text=keywords.split(','))
+            if authors:
+                base_q &= Q("terms", auteurs__nom=authors.split(','))
+            if institutions:
+                base_q &= Q("terms", auteurs__institutions__nom=institutions.split(','))
+            if start_date and end_date:
+                base_q &= Q("range", date_publication={"gte": start_date, "lte": end_date})
+        
+        return base_q
