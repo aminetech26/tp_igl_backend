@@ -14,6 +14,7 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from .utils import extract_drive_folder_id
 from .scrapping.grobid_scrapper_manager import GrobidScrapperManager
+from django.http import Http404
 
 class ArticleViewSet(ModelViewSet):
     serializer_class = ArticleSerializer
@@ -39,6 +40,20 @@ class ArticleViewSet(ModelViewSet):
             print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+    @action(detail=True,methods=['put'],url_path='validate')
+    def validate_article(self,request,*args,**kwargs):
+        try:
+            article = self.get_object()
+            if article.is_validated:
+                return Response({'message': 'Article already validated'}, status=status.HTTP_400_BAD_REQUEST)
+            article.is_validated = True
+            article.save()
+            return Response({'message': 'Article validated successfully'}, status=status.HTTP_200_OK)
+        except Http404:
+            return Response({'message': 'Article not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(e)
+            return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     @action(detail=False, methods=['post'], url_path='upload-via-file')
     def upload_article_via_file(self, request, *args, **kwargs):
