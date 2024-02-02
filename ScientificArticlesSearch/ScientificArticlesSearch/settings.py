@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import decouple 
+import config
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -113,14 +115,16 @@ WSGI_APPLICATION = 'ScientificArticlesSearch.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+SECRET_KEY = config('SECRET_KEY')
+
 DATABASES = {
   'default': {
     'ENGINE': 'django.db.backends.postgresql',
-    'NAME': os.getenv('DB_NAME'),
-    'USER': os.getenv('DB_USER'),
-    'PASSWORD': os.getenv('DB_PASSWORD'),
-    'HOST': os.getenv('DB_HOST'),
-    'PORT': os.getenv('DB_PORT'),
+    'NAME': os.getenv('MYSQL_DATABASE'),
+    'USER': os.getenv('MYSQL_USER'),
+    'PASSWORD': os.getenv('MYSQL_PASSWORD'),
+    'HOST': config('DB_HOST', 'db'),
+    'PORT': config('DB_PORT', '3306'),
     'OPTIONS': {'sslmode': 'require'},
     'DISABLE_SERVER_SIDE_CURSORS': True,
   }
