@@ -10,6 +10,7 @@ from rest_framework import status
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 TOKEN_EXPIRATION_ACCESS = 600
 TOKEN_EXPIRATION_REFRESH = 1440
@@ -34,7 +35,6 @@ class AuthenticationViewSet(ViewSet):
             400: openapi.Response('Bad request'),
         }
     )
-    
     @action (detail=False, methods=['post'],permission_classes = (AllowAny,))
     def register(self, request):
         user_type = request.data.get('user_type')
