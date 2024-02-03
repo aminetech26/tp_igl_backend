@@ -25,7 +25,6 @@ class AuthMiddleware :
             return self.get_response(request)
         request.user = User.objects.filter(id = payload['id']).first()
         request.Auth = True
-        print(request.user)
         response = self.get_response(request)
         return response
        

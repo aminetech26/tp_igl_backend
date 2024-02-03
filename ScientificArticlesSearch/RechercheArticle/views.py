@@ -5,7 +5,8 @@ from elasticsearch_dsl import Q
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.views import APIView
 from rest_framework import permissions
-
+from .CustomPermissions import IsAuth,IsAdmin,IsModerator
+from rest_framework.permissions import AllowAny , IsAuthenticated
 from Articles.documents import ArticleDocument
 from .serializers import ArticleSearchResultSerializer
 
@@ -39,6 +40,7 @@ class PaginatedElasticSearchAPIView(APIView, LimitOffsetPagination):
 class SearchArticles(PaginatedElasticSearchAPIView):
     serializer_class = ArticleSearchResultSerializer
     document_class = ArticleDocument
+    permission_classes = (IsAuthenticated,)
 
     def generate_q_expression(self, query, filters=None):
         base_q = Q(
@@ -49,7 +51,6 @@ class SearchArticles(PaginatedElasticSearchAPIView):
                 "titre",
                 "text_integral",
                 "auteurs.nom",
-                "auteurs.prenom",
                 "mot_cles.text",
             ], fuzziness="auto")
 
@@ -59,14 +60,31 @@ class SearchArticles(PaginatedElasticSearchAPIView):
             institutions = filters.get('institutions')
             start_date = filters.get('start_date')
             end_date = filters.get('end_date')
-            
+
             if keywords:
-                base_q &= Q("terms", mot_cles__text=keywords.split(','))
+                base_q &= Q(
+                        "multi_match",
+                        query= keywords,
+                        type="most_fields",
+                        fields=[
+                            "mot_cles.text",
+                        ])
             if authors:
-                base_q &= Q("terms", auteurs__nom=authors.split(','))
+                base_q &=  Q(
+                        "multi_match",
+                        query= authors,
+                        type="most_fields",
+                        fields=[
+                            "auteurs.nom",
+                        ])
             if institutions:
-                base_q &= Q("terms", auteurs__institutions__nom=institutions.split(','))
+                base_q &= Q(
+                        "multi_match",
+                        query= institutions,
+                        type="most_fields",
+                        fields=[
+                            "auteurs.institutions.nom",
+                        ])
             if start_date and end_date:
-                base_q &= Q("range", date_publication={"gte": start_date, "lte": end_date})
-        
+                base_q &= Q("range", date_de_publication={"gte": start_date, "lte": end_date})
         return base_q

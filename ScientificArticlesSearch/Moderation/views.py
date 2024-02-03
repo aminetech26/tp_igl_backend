@@ -4,6 +4,9 @@ from rest_framework.response import Response
 from Authentication.models import User
 from Authentication.serializers import UserSerializer
 
+from .CustomPermissions import IsAdmin,IsModerator
+from rest_framework.permissions import AllowAny , IsAuthenticated
+
 from django.db import IntegrityError
 from .utils import send_moderator_account_create_email
 from drf_yasg import openapi
@@ -12,7 +15,7 @@ from rest_framework.decorators import action
 class ModerationView(ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.filter(user_type='Mod')
-    
+    permission_classes = (IsAuthenticated,IsAdmin,)
     def create(self, request, *args, **kwargs):
         email = request.data.get('email')
         username = request.data.get('username')
