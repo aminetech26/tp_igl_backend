@@ -4,11 +4,13 @@ from .models import ArticleFavoris
 from .serializers import ArticleFavorisSerializer
 from Articles.models import Article
 from Authentication.models import User
+from .CustomPermissions import IsAuth,IsAdmin,IsModerator
+from rest_framework.permissions import AllowAny , IsAuthenticated
 from Articles.serializers import ArticleSerializer
 class ArticleFavorisViewSet(viewsets.ModelViewSet):
     queryset = ArticleFavoris.objects.all()
     serializer_class = ArticleFavorisSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     
     
     def list(self, request, *args, **kwargs):

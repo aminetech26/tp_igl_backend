@@ -13,6 +13,8 @@ from zipfile import ZipFile
 import requests
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from rest_framework.permissions import AllowAny , IsAuthenticated
+from .CustomPermissions import IsAdmin, IsModerator
 from .utils import extract_drive_folder_id
 from .scrapping.grobid_scrapper_manager import GrobidScrapperManager
 from django.http import Http404
@@ -21,7 +23,7 @@ class ArticleViewSet(ModelViewSet):
     serializer_class = ArticleSerializer
     queryset = Article.objects.all()
     
-    @action(detail=False,methods=['get'],url_path='validated')
+    @action(detail=False, methods=['post'], url_path='upload-via-file',permission_classes=(IsAuthenticated,IsAdmin,))
     def get_validated_articles(self,request,*args,**kwargs):
         try:
             articles = Article.objects.filter(is_validated=True)
@@ -70,7 +72,7 @@ class ArticleViewSet(ModelViewSet):
             print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    @action(detail=False, methods=['post'], url_path='upload-via-zip')
+    @action(detail=False, methods=['post'], url_path='upload-via-zip',permission_classes=(IsAuthenticated,IsAdmin,))
     def upload_article_via_zip(self, request, *args, **kwargs):
         try:
             zip_file = request.FILES.get('file')
@@ -98,7 +100,7 @@ class ArticleViewSet(ModelViewSet):
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
     
-    @action(detail=False, methods=['post'], url_path='upload-via-url')
+    @action(detail=False, methods=['post'], url_path='upload-via-url',permission_classes=(IsAuthenticated,IsAdmin,))
     def upload_article_via_url(self, request, *args, **kwargs):
         try:
             if request.data.get('url'):
@@ -133,7 +135,7 @@ class ArticleViewSet(ModelViewSet):
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+        return self.super().create(request, *args, **kwargs)
     
     def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
+        return self.super().update(request, *args, **kwargs)
