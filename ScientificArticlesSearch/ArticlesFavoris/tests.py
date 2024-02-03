@@ -44,10 +44,11 @@ class ArticlesFavorisApiTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
-        self.assertEqual(response.data[0]['article']['titre'], 'Article 1')
-        self.assertEqual(response.data[1]['article']['titre'], 'Article 2')
+        self.assertEqual(response.data[0]['titre'], 'Article 1')
+        self.assertEqual(response.data[1]['titre'], 'Article 2')
     
-    def test_add_favoris(self):
+    
+    def test_add_favoris_successfully(self):
         url = reverse('favoris-list')
         new_article = Article.objects.create(
             titre="Article 3",
@@ -61,8 +62,50 @@ class ArticlesFavorisApiTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(ArticlesFavoris.objects.count(), 3)
     
-    def test_remove_favoris(self):
+    def test_add_favoris_article_not_found(self):
+        url = reverse('favoris-list')
+        data = {
+            'article': 100,
+            'user': self.user
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(ArticlesFavoris.objects.count(), 2)
+        
+    def test_add_favoris_article_deja_favoris(self):
+        url = reverse('favoris-list')
+        data = {
+            'article': self.article1,
+            'user': self.user
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(ArticlesFavoris.objects.count(), 2)
+    
+    def test_add_favoris_article_not_validated(self):
+        url = reverse('favoris-list')
+        new_article = Article.objects.create(
+            titre="Article 4",
+            resume="Resume 4",
+            is_validated=False
+        )
+        data = {
+            'article': new_article,
+            'user': self.user
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(ArticlesFavoris.objects.count(), 2)
+        
+        
+    def test_remove_favoris_successfully(self):
         url = reverse('favoris-detail', kwargs={'pk': 1})
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(ArticlesFavoris.objects.count(), 1)
+    
+    def test_remove_favoris_not_found(self):
+        url = reverse('favoris-detail', kwargs={'pk': 100})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(ArticlesFavoris.objects.count(), 2)

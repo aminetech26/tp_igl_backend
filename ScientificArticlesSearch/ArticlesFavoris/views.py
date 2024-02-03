@@ -4,6 +4,7 @@ from .models import ArticleFavoris
 from .serializers import ArticleFavorisSerializer
 from Articles.models import Article
 from Authentication.models import User
+from Articles.serializers import ArticleSerializer
 class ArticleFavorisViewSet(viewsets.ModelViewSet):
     queryset = ArticleFavoris.objects.all()
     serializer_class = ArticleFavorisSerializer
@@ -12,8 +13,9 @@ class ArticleFavorisViewSet(viewsets.ModelViewSet):
     
     def list(self, request, *args, **kwargs):
         user_id = request.user.id
-        queryset = ArticleFavoris.objects.filter(user=user_id)
-        serializer = self.get_serializer(queryset, many=True)
+        favorite_articles = ArticleFavoris.objects.filter(user=user_id)
+        articles = [fav.article for fav in favorite_articles]
+        serializer = ArticleSerializer(articles, many=True)
         return Response(serializer.data)
     
     def create(self, request, *args, **kwargs):
