@@ -59,7 +59,6 @@ class ArticleViewSet(ModelViewSet):
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     @action(detail=False, methods=['post'], url_path='upload-via-file')
->>>>>>> master
     def upload_article_via_file(self, request, *args, **kwargs):
         try:
             if(request.FILES.get('file') is not None):
@@ -136,7 +135,7 @@ class ArticleViewSet(ModelViewSet):
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+        return self.super().create(request, *args, **kwargs)
     
     def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
+        return self.super().update(request, *args, **kwargs)
