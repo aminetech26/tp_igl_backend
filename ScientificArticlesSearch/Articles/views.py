@@ -23,7 +23,7 @@ class ArticleViewSet(ModelViewSet):
     serializer_class = ArticleSerializer
     queryset = Article.objects.all()
     
-    @action(detail=False, methods=['post'], url_path='upload-via-file',permission_classes=(IsAuthenticated,IsAdmin,))
+    @action(detail=False, methods=['post'], url_path='upload-via-file',permission_classes=(IsAuthenticated,))
     def get_validated_articles(self,request,*args,**kwargs):
         try:
             articles = Article.objects.filter(is_validated=True)
@@ -33,7 +33,7 @@ class ArticleViewSet(ModelViewSet):
             print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    @action(detail=False,methods=['get'],url_path='not_validated')
+    @action(detail=False,methods=['get'],url_path='not_validated',permission_classes=(IsAuthenticated,IsModerator,))
     def get_not_validated_articles(self,request,*args,**kwargs):
         try:
             articles = Article.objects.filter(is_validated=False)
@@ -43,7 +43,7 @@ class ArticleViewSet(ModelViewSet):
             print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    @action(detail=True,methods=['put'],url_path='validate')
+    @action(detail=True,methods=['put'],url_path='validate',permission_classes=(IsAuthenticated,IsModerator,))
     def validate_article(self,request,*args,**kwargs):
         try:
             article = self.get_object()
@@ -58,7 +58,7 @@ class ArticleViewSet(ModelViewSet):
             print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    @action(detail=False, methods=['post'], url_path='upload-via-file')
+    @action(detail=False, methods=['post'], url_path='upload-via-file',permission_classes=(IsAuthenticated,IsAdmin,))
     def upload_article_via_file(self, request, *args, **kwargs):
         try:
             if(request.FILES.get('file') is not None):
@@ -125,7 +125,7 @@ class ArticleViewSet(ModelViewSet):
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     
-    @action(detail=False, methods=['post'], url_path='upload-via-drive')
+    @action(detail=False, methods=['post'], url_path='upload-via-drive',permission_classes=(IsAuthenticated,IsAdmin,))
     def upload_article_via_drive(self, request, *args, **kwargs):
         try:
             GrobidScrapperManager().run_scrapper()
