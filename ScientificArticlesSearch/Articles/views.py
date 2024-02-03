@@ -1,3 +1,4 @@
+from rest_framework import permissions
 from django.core.files.base import ContentFile
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response

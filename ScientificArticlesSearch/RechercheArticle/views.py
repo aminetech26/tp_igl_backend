@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from elasticsearch_dsl import Q
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.views import APIView
+from rest_framework import permissions
 
 from Articles.documents import ArticleDocument
 from .serializers import ArticleSearchResultSerializer
@@ -12,7 +13,7 @@ from .serializers import ArticleSearchResultSerializer
 class PaginatedElasticSearchAPIView(APIView, LimitOffsetPagination):
     serializer_class = None
     document_class = None
-
+    
     @abc.abstractmethod
     def generate_q_expression(self, query, filters):
         """This method should be overridden
