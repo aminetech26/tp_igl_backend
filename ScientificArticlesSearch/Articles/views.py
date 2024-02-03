@@ -11,12 +11,14 @@ from zipfile import ZipFile
 import requests
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from rest_framework.permissions import AllowAny , IsAuthenticated
+from .CustomPermissions import IsAdmin, IsModerator
 
 class ArticleViewSet(ModelViewSet):
     serializer_class = ArticleSerializer
     queryset = Article.objects.all()
     
-    @action(detail=False, methods=['post'], url_path='upload-via-file')
+    @action(detail=False, methods=['post'], url_path='upload-via-file',permission_classes=(IsAuthenticated,IsAdmin,))
     def upload_article_via_file(self, request, *args, **kwargs):
         try:
             if(request.FILES.get('file') is not None):
@@ -31,7 +33,7 @@ class ArticleViewSet(ModelViewSet):
             print(e)
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    @action(detail=False, methods=['post'], url_path='upload-via-zip')
+    @action(detail=False, methods=['post'], url_path='upload-via-zip',permission_classes=(IsAuthenticated,IsAdmin,))
     def upload_article_via_zip(self, request, *args, **kwargs):
         try:
             zip_file = request.FILES.get('file')
@@ -60,7 +62,7 @@ class ArticleViewSet(ModelViewSet):
             return Response({'message': "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
     
-    @action(detail=False, methods=['post'], url_path='upload-via-url')
+    @action(detail=False, methods=['post'], url_path='upload-via-url',permission_classes=(IsAuthenticated,IsAdmin,))
     def upload_article_via_url(self, request, *args, **kwargs):
         try:
             if request.data.get('url'):

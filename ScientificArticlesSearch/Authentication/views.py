@@ -9,7 +9,13 @@ from .utils import create_token, decode_token
 from rest_framework import status
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.permissions import AllowAny, IsAuthenticated
+
+
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+
+from .CustomPermissions import IsAdmin, IsModerator
+
+from rest_framework.permissions import AllowAny , IsAuthenticated
 
 TOKEN_EXPIRATION_ACCESS = 600
 TOKEN_EXPIRATION_REFRESH = 1440
@@ -62,6 +68,9 @@ class AuthenticationViewSet(ViewSet):
     )
     @action(detail=False, methods=['post'],permission_classes = (AllowAny,))
     def login(self, request):
+
+        print(request.user)       
+
         username = request.data['username']
         password = request.data['password']
 
@@ -72,13 +81,11 @@ class AuthenticationViewSet(ViewSet):
 
         if not user.check_password(password):
             raise AuthenticationFailed('Incorrect password!')
-        
-        payload = {
-            'id': user.id,
-        }
-        refresh_token = create_token(payload, TOKEN_EXPIRATION_REFRESH, settings.SECRET_KEY)
-        access_token = create_token(payload, TOKEN_EXPIRATION_ACCESS, settings.SECRET_KEY)
-        
+
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+        refresh_token= str(refresh)
+        access_token = str(access)
         response = Response()
 
         response.set_cookie(key='RefreshToken', value=refresh_token, httponly=True)
@@ -89,7 +96,7 @@ class AuthenticationViewSet(ViewSet):
         }
         return response
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'],permission_classes = (IsAuthenticated,))
     def logout(self, request):
         response = Response()
         response.delete_cookie('RefreshToken')
@@ -98,21 +105,21 @@ class AuthenticationViewSet(ViewSet):
         }
         return response
     
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'],permission_classes = (AllowAny,))
     def refresh(self,request):
-        refresh_token = request.COOKIES.get('RefreshToken')
-        if not refresh_token:
+        raw_token = request.COOKIES.get('RefreshToken')
+        if not raw_token:
             raise AuthenticationFailed('Unauthenticated!')
 
-        payload = decode_token(refresh_token)
-        #generating a an access token with the valid refresh token 
-        user_id = payload['id']
-        payload = {
-            'id': user_id,
-        }       
-        access_token = create_token(payload, TOKEN_EXPIRATION_ACCESS, settings.SECRET_KEY)
+        
+        refresh_token = RefreshToken(raw_token)
+        access = refresh_token.access_token
+        access_token = str(access)
         response = Response()
         response.data = {
             'AccessToken': access_token,
         }
         return response
+    
+
+    

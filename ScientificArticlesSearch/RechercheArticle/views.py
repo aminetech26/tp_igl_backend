@@ -5,7 +5,8 @@ from elasticsearch_dsl import Q
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.views import APIView
 from rest_framework import permissions
-
+from .CustomPermissions import IsAuth,IsAdmin,IsModerator
+from rest_framework.permissions import AllowAny , IsAuthenticated
 from Articles.documents import ArticleDocument
 from .serializers import ArticleSearchResultSerializer
 
@@ -39,6 +40,7 @@ class PaginatedElasticSearchAPIView(APIView, LimitOffsetPagination):
 class SearchArticles(PaginatedElasticSearchAPIView):
     serializer_class = ArticleSearchResultSerializer
     document_class = ArticleDocument
+    permission_classes = (IsAuthenticated,)
 
     def generate_q_expression(self, query, filters=None):
         base_q = Q(
