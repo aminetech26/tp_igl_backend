@@ -111,7 +111,6 @@ class ArticleViewSet(ModelViewSet):
                         file_path = fs.url(file_name)
                         uploaded_article = UploadedArticle(file=file_path.lstrip('/'))
                         uploaded_article.save()
-                        #TODO: call pdf scrapper here
                         return Response({'message': 'File downloaded and saved successfully'}, status=status.HTTP_201_CREATED)
                     else:
                         return Response({'message': 'File not found'}, status=status.HTTP_404_NOT_FOUND)
