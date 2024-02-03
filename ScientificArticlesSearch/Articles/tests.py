@@ -4,6 +4,8 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from .models import Article,Auteur,Institution,MotCle,ReferenceBibliographique
 from .serializers import ArticleSerializer
+import urllib3
+
 
 class InstitutionTests(TestCase):
     @classmethod
@@ -25,9 +27,9 @@ class MotCleTests(TestCase):
 
 class ReferenceBibliographiqueTests(TestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpTestData(cls):    
         cls.referencebibliographique = ReferenceBibliographique.objects.create(nom="International Conference on New Trends in Computing Sciences (ICTCS)")
-        
+    
     def test_referencebibliographique_content(self):
         self.assertEquals(self.referencebibliographique.nom,'International Conference on New Trends in Computing Sciences (ICTCS)')
         
@@ -36,12 +38,11 @@ class AuteurTests(TestCase):
     def setUpTestData(cls):
         institution = Institution.objects.create(nom="ESI")
         
-        cls.auteur = Auteur.objects.create(nom="Yessed",prenom="Lamia")
+        cls.auteur = Auteur.objects.create(nom="Yessed")
         cls.auteur.institutions.set([institution])
         
     def test_auteur_content(self):
         self.assertEquals(self.auteur.nom,'Yessed')
-        self.assertEquals(self.auteur.prenom,'Lamia')
         self.assertEquals(self.auteur.institutions.first().nom,'ESI')
         
 class ArticleTests(TestCase):
@@ -50,14 +51,14 @@ class ArticleTests(TestCase):
         institution = Institution.objects.create(nom="ESI")
         motcle = MotCle.objects.create(text="Graph Coloring Problem")
         referencebibliographique = ReferenceBibliographique.objects.create(nom="International Conference on New Trends in Computing Sciences (ICTCS)")
-        auteur = Auteur.objects.create(nom="Yessed",prenom="Lamia")
+        auteur = Auteur.objects.create(nom="Yessed")
         auteur.institutions.set([institution])
         
         cls.article = Article.objects.create(titre="titre",resume="resume",text_integral="text_integral",url="url",date_de_publication="2021-01-01")
         cls.article.mot_cles.set([motcle])
         cls.article.auteurs.set([auteur])
         cls.article.references_bibliographique.set([referencebibliographique])
-        
+
     def test_article_content(self):
         self.assertEquals(self.article.titre,'titre')
         self.assertEquals(self.article.resume,'resume')
@@ -66,7 +67,6 @@ class ArticleTests(TestCase):
         self.assertEquals(self.article.date_de_publication,'2021-01-01')
         self.assertEquals(self.article.mot_cles.first().text,'Graph Coloring Problem')
         self.assertEquals(self.article.auteurs.first().nom,'Yessed')
-        self.assertEquals(self.article.auteurs.first().prenom,'Lamia')
         self.assertEquals(self.article.auteurs.first().institutions.first().nom,'ESI')
         self.assertEquals(self.article.references_bibliographique.first().nom,'International Conference on New Trends in Computing Sciences (ICTCS)')
         
@@ -77,7 +77,7 @@ class ArticleApiTests(TestCase):
         institution = Institution.objects.create(nom="nom")
         motcle = MotCle.objects.create(text="text")
         referencebibliographique = ReferenceBibliographique.objects.create(nom="nom")
-        auteur = Auteur.objects.create(nom="nom",prenom="prenom")
+        auteur = Auteur.objects.create(nom="nom")
         auteur.institutions.set([institution])
         
         cls.article = Article.objects.create(
@@ -119,7 +119,6 @@ class ArticleApiTests(TestCase):
             "auteurs": [
                 {
                     "nom": "nom",
-                    "prenom": "prenom",
                     "institutions": [
                         {
                             "nom": "nom",
@@ -143,7 +142,6 @@ class ArticleApiTests(TestCase):
         self.assertEqual(Article.objects.last().date_de_publication.__str__(), '2021-01-01')
         self.assertEqual(Article.objects.last().mot_cles.first().text, 'text')
         self.assertEqual(Article.objects.last().auteurs.first().nom, 'nom')
-        self.assertEqual(Article.objects.last().auteurs.first().prenom, 'prenom')
         self.assertEqual(Article.objects.last().auteurs.first().institutions.first().nom, 'nom')
         self.assertEqual(Article.objects.last().references_bibliographique.first().nom, 'nom')
     
@@ -168,7 +166,6 @@ class ArticleApiTests(TestCase):
             "auteurs": [
                 {
                     "nom": "nom",
-                    "prenom": "prenom",
                     "institutions": [
                         {
                             "nom": "nom",
@@ -218,7 +215,6 @@ class ArticleApiTests(TestCase):
             "auteurs": [
                 {
                     "nom": "nom",
-                    "prenom": "prenom",
                     "institutions": [
                         {
                             "nom": "nom",
@@ -242,7 +238,6 @@ class ArticleApiTests(TestCase):
         self.assertEqual(Article.objects.last().date_de_publication.__str__(), '2021-01-01')
         self.assertEqual(Article.objects.last().mot_cles.first().text, 'text')
         self.assertEqual(Article.objects.last().auteurs.first().nom, 'nom')
-        self.assertEqual(Article.objects.last().auteurs.first().prenom, 'prenom')
         self.assertEqual(Article.objects.last().auteurs.first().institutions.first().nom, 'nom')
         self.assertEqual(Article.objects.last().references_bibliographique.first().nom, 'nom')
         
@@ -263,7 +258,6 @@ class ArticleApiTests(TestCase):
             "auteurs": [
                 {
                     "nom": "nom",
-                    "prenom": "prenom",
                     "institutions": [
                         {
                             "nom": "nom",
@@ -302,7 +296,6 @@ class ArticleApiTests(TestCase):
             "auteurs": [
                 {
                     "nom": "nom",
-                    "prenom": "prenom",
                     "institutions": [
                         {
                             "nom": "nom",
@@ -344,72 +337,20 @@ class ArticleApiTests(TestCase):
         self.assertEqual(Institution.objects.count(), 1)
         self.assertEqual(ReferenceBibliographique.objects.count(), 1)
     
-    def test_upload_article_via_url_with_not_valid_url(self):
-        url = reverse('article-upload-via-url')
-        data = {
-            "url": "https://www.researchgate.net/publication/333502343_A_New_Approach_for_Solving_the_Graph_Coloring_Problem"
-        }
-        response = self.client.post(url,data,format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data.get('message'), 'Invalid PDF URL')
-        # aucune article n'est ajouté
-        self.assertEqual(Article.objects.count(), 1)
-        self.assertEqual(MotCle.objects.count(), 1)
-        self.assertEqual(Auteur.objects.count(), 1)
-        self.assertEqual(Institution.objects.count(), 1)
-        self.assertEqual(ReferenceBibliographique.objects.count(), 1)
-    
-    def test_upload_article_via_url_with_not_found_url(self):
-        url = reverse('article-upload-via-url')
-        data = {
-            "url": "https://not_found_url_example.pdf"
-        }
-        response = self.client.post(url,data,format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.data.get('message'), 'File not found')
-        # aucune article n'est ajouté
-        self.assertEqual(Article.objects.count(), 1)
-        self.assertEqual(MotCle.objects.count(), 1)
-        self.assertEqual(Auteur.objects.count(), 1)
-        self.assertEqual(Institution.objects.count(), 1)
-        self.assertEqual(ReferenceBibliographique.objects.count(), 1)
-    
-    def test_upload_article_via_url_with_empty_body(self):
-        url = reverse('article-upload-via-url')
-        data = {}
-        response = self.client.post(url,data,format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data.get('message'), 'Please provide a url')
-        # aucune article n'est ajouté
-        self.assertEqual(Article.objects.count(), 1)
-        self.assertEqual(MotCle.objects.count(), 1)
-        self.assertEqual(Auteur.objects.count(), 1)
-        self.assertEqual(Institution.objects.count(), 1)
-        self.assertEqual(ReferenceBibliographique.objects.count(), 1)
-    
-    def test_upload_article_via_url_with_valid_url(self):
-        url = reverse('article-upload-via-url')
-        data = {
-            "url": "https://www.researchgate.net/publication/333502343_A_New_Approach_for_Solving_the_Graph_Coloring_Problem.pdf"
-        }
-        response = self.client.post(url,data,format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data.get('message'), 'File downloaded and saved successfully')
-        #TODO: finish the test when you integrate the pdf scrapper
-    
-    def test_upload_article_via_zip_with_not_valid_file(self):
-        url = reverse('article-upload-via-zip')
-        data = {
-            "file": "not_valid_file"
-        }
-        response = self.client.post(url,data,format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data.get('message'), 'Please upload a zip file.')
-        # aucune article n'est ajouté
-        self.assertEqual(Article.objects.count(), 1)
-        self.assertEqual(MotCle.objects.count(), 1)
-        self.assertEqual(Auteur.objects.count(), 1)
-        self.assertEqual(Institution.objects.count(), 1)
-        self.assertEqual(ReferenceBibliographique.objects.count(), 1)
+    def test_get_validated_articles(self):
+        url = reverse('article-list')
+        response = self.client.get(f"{url}validated", follow=True)
+        articles = Article.objects.filter(is_validated=True)
+        serializer = ArticleSerializer(articles, many=True)
         
-        
+        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_not_validated_articles(self):
+        url = reverse('article-list')
+        response = self.client.get(f"{url}not_validated", follow=True)
+        articles = Article.objects.filter(is_validated=False)
+        serializer = ArticleSerializer(articles, many=True)
+
+        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

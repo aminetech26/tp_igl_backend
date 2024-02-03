@@ -28,12 +28,6 @@ SECRET_KEY = 'django-insecure-53b1by)ov(0^2m^@!$a0=4#ke1o8#&4cwcoh$pk7#inga!=xi&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1']
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
 
 # Application definition
 
@@ -72,11 +66,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+ALLOWED_HOSTS = ['localhost','127.0.0.1']
+CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://127.0.0.1:8080",
     "http://localhost:8080",
+    "http://127.0.0.1:8080",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
@@ -193,7 +190,10 @@ REST_FRAMEWORK = {
 
 MEDIA_URL = '/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
-
+CLIENT_SECRET_FILE = 'client_secret_808300273724-h05se6t7qe1ro4opie0sdkdj0bu3m5vd.apps.googleusercontent.com.json'
+API_NAME = 'drive'
+API_VERSION = 'v3'
+SCOPES = ['https://www.googleapis.com/auth/drive']
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
@@ -201,3 +201,4 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
